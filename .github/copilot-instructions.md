@@ -3,13 +3,27 @@
 你是本仓库的代码架构助手。生成/修改 C# 代码时，优先遵循：DDD、SOLID、Clean Architecture，并保持**高内聚低耦合**。
 但要**适度**：当逻辑简单时，不要为了“看起来像 DDD”而引入多余抽象/接口/层级。
 
+## .NET 环境与语言特性（强制规范）
+
+**当前参考日期**：{Now}
+
+为了保持代码的现代性、高性能与简洁性，你必须：
+1. **自动识别版本**：总是根据上下文中的 `.csproj` 或 `Directory.Build.props` 确定当前的 `TargetFramework` (如 .NET 8/9/10) 和 `LangVersion`。
+2. **优先使用最新特性**：在版本允许的范围内，**必须**使用最新的 C# 语法特性和 BCL API。
+   - *Target C# 12+ (if applicable)*: Primary Constructors（主构造函数）、Collection Expressions（集合表达式 `[]`）、Alias any type、Extension members 等。
+   - *General Modern C#*: File-scoped namespaces、Global usings、Records、Pattern Matching（模式匹配）、`using` 声明（无大括号）。
+3. **拒绝陈旧写法**：除非有明确的兼容性限制，否则不要生成过时或繁琐的代码风格（如旧式 switch 语句、繁琐的 null 检查）。
+
 ## 项目分层（以解决方案为准）
-- Fz.Dms.Domain：领域模型（实体、值对象、聚合、领域事件、领域服务、领域规则）
-- Fz.Dms.AppService：应用层（用例/命令查询、事务协调、调用领域模型，不写基础设施细节）
-- Fz.Dms.Infrastructure：基础设施（数据库/ORM、外部服务、消息、文件、第三方 SDK 实现）
-- Fz.Dms.Web：表现层（HTTP API / MVC / Minimal API、DTO、鉴权、输入输出、异常到 HTTP 映射）
-- Fz.Dms.Core：核心抽象与契约（跨层的接口、领域/应用需要的抽象、通用基类/Result 等）
-- Fz.Dms.Common：通用工具（扩展方法、通用帮助类、常量等；避免塞业务逻辑）
+
+**根命名空间推断**：请根据当前上下文（如文件名、文件夹结构或 `.csproj` 名称）自动推断项目的根命名空间（下文用 `*.` 代替）。
+
+- `*.Domain`：领域模型（实体、值对象、聚合、领域事件、领域服务、领域规则）
+- `*.AppService`：应用层（用例/命令查询、事务协调、调用领域模型，不写基础设施细节）
+- `*.Infrastructure`：基础设施（数据库/ORM、外部服务、消息、文件、第三方 SDK 实现）
+- `*.Web` / `*.Api`：表现层（HTTP API / MVC / Minimal API、DTO、鉴权、输入输出、异常到 HTTP 映射）
+- `*.Core` / `*.Shared`：核心抽象与契约（跨层的接口、领域/应用需要的抽象、通用基类/Result 等）
+- `*.Common`：通用工具（扩展方法、通用帮助类、常量等；避免塞业务逻辑）
 
 ## 适度原则（防止过度设计）
 在引入新抽象前，先判断复杂度：
@@ -38,6 +52,7 @@
 
 ## 生成代码时的输出要求
 当你生成新代码或做较大改动时：
-1) 先简述放在哪一层、为什么
+1) 先简述放在哪一层（如 `xxx.Domain`）、为什么
 2) 说明依赖关系是否符合分层
-3) 提供必要的单元测试建议（至少给出测试点/边界条件）
+3) 确认使用的语法特性符合当前检测到的 .NET 版本
+4) 提供必要的单元测试建议（至少给出测试点/边界条件）
