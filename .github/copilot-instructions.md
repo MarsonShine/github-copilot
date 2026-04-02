@@ -44,6 +44,13 @@
 - 依赖倒置：上层依赖接口/抽象（放 Core 或 AppService/Domain 合适位置）
 - 接口隔离：避免“万能接口”
 - 保持可测试性：业务规则优先在 Domain/AppService，可用单元测试覆盖
+- 对外暴露的 async 方法，以及所有 I/O / 数据库 / HTTP / 文件 / 消息外部调用，优先显式接收 `CancellationToken ct = default` 并沿调用链传递；除非确实是纯内存计算且无等待点，否则不要省略
+
+## C# / .NET 技能协同
+- 处理 C#、ASP.NET Core、EF Core、.NET 升级、异步、测试或性能问题时，默认把 `csharp-dotnet-development` 当作该领域的最佳实践来源；如果当前会话可用 `csharp-dotnet-development:expert-dotnet-software-engineer`，优先让它提供 .NET 侧的实现判断。
+- 技能建议与本仓库规则要合并使用：技能负责 .NET 细节最佳实践（async/await、CancellationToken、DI、nullability、测试），仓库规则负责分层、命名、依赖方向和最小可行改动。
+- 当二者出现冲突时，以本仓库已有代码、分层约束和显式需求为准；当技能提供更强且不冲突的 .NET 习惯时，优先采纳。
+- 生成异步代码时，默认让方法签名显式接收并向下传递 `CancellationToken ct = default`，不要把取消能力留给调用方猜测。
 
 ## 错误处理与结果建模
 - 业务失败用可表达的领域/应用结果（例如 Result / ErrorCode / DomainException）

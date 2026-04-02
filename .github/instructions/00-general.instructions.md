@@ -14,3 +14,5 @@ applyTo: "**/*.cs"
 - 避免不必要的分配和过深的调用链
 - 注意 async/await 正确使用，避免 .Result/.Wait()
 - 参数校验清晰：外层（Web）做输入校验，领域层做不变量校验
+- 对外暴露的 async 方法，以及所有 I/O / 数据库 / HTTP / 文件 / 消息外部调用，优先显式接收 `CancellationToken ct = default` 并沿调用链传递；除非确实是纯内存计算且无等待点，否则不要省略
+- C# / .NET 任务默认按 `csharp-dotnet-development` 的最佳实践处理；把仓库指令当作硬约束，把技能当作 .NET 细节参考，二者要合并后再输出方案
