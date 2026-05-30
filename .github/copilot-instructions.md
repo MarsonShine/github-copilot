@@ -63,3 +63,139 @@
 2) 说明依赖关系是否符合分层
 3) 确认使用的语法特性符合当前检测到的 .NET 版本
 4) 提供必要的单元测试建议（至少给出测试点/边界条件）
+
+## 项目指南
+
+- For temporary data import endpoints in this repository, prefer using the built-in `ExcelHelper` to map uploaded files into classes, and perform direct database updates in the controller via `[FromServices]`-injected DbContext instead of adding repository methods.
+
+## Git 操作指南
+
+### 基本原则
+
+- 不要在用户未明确要求的情况下主动执行 `git commit`、`git push`、`git reset --hard`、`git clean` 等会改变仓库状态或远端状态的操作。
+- 执行或建议执行 `git commit`、`git push` 前，必须先检查本次改动中是否包含敏感信息。
+- 提交前应尽量保证改动范围清晰、职责单一，避免把无关修改混在同一次提交中。
+- 生成提交信息时，应根据当前 Git 用户决定提交语言。
+
+### 敏感信息检查
+
+在执行或建议执行 `git commit`、`git push` 前，必须检查暂存区和本次改动中是否包含敏感信息。
+
+重点检查内容包括但不限于：
+
+- 密码、Token、API Key、Secret Key、Access Key
+- 数据库连接字符串、Redis 连接字符串、MQ 连接字符串
+- 私钥、证书、`.pfx`、`.pem`、`.key` 等文件或内容
+- Cookie、Session、Authorization Header
+- 内网地址、生产环境地址、生产账号信息
+- 用户隐私数据、身份证号、手机号、邮箱、真实客户数据
+- `.env`、`appsettings.Production.json`、`appsettings.*.json` 中的敏感配置
+- 临时调试日志中打印的业务数据或凭据
+
+建议检查命令：
+
+```bash
+git diff --cached
+git diff
+git status --short
+```
+
+必要时可结合关键词搜索：
+
+```bash
+git diff --cached | grep -Ei "password|passwd|pwd|token|secret|apikey|api_key|accesskey|access_key|connectionstring|authorization|bearer|private key"
+```
+
+规则如下：
+
+- 如果发现明确的敏感信息，必须停止提交或推送，并提醒用户移除、脱敏或改用安全配置方式。
+- 如果发现疑似敏感信息，不能自行判断为安全，必须交给用户手动确认是否一定要提交。
+- 如果用户明确确认要提交疑似敏感信息，应在回复中说明风险，并优先建议改为配置项、环境变量、密钥管理服务或本地未跟踪文件。
+- 不要自动删除、改写或脱敏用户文件，除非用户明确要求。
+- 不要在回复中完整复述敏感信息原文；必要时只展示脱敏片段，例如 `sk-****abcd`。
+- 敏感信息检查通过后，才可以继续生成 commit message、执行 commit 或建议 push。
+
+### Git 用户与提交语言
+
+提交代码或生成 commit message 时，先判断当前 Git 用户：
+
+```bash
+git config --get user.name
+```
+
+规则如下：
+
+- 如果 Git 用户是 `ms27946`，commit message 使用英文。
+- 否则视为公司账户，commit message 使用中文。
+- 如果无法确认 Git 用户，不要猜测；应提醒用户确认或手动提供提交语言。
+
+### Commit Message 格式
+
+提交信息统一使用以下格式：
+
+```text
+<type>: <summary>
+```
+
+允许在必要时添加 scope：
+
+```text
+<type>(<scope>): <summary>
+```
+
+示例：
+
+```text
+feat: add temporary data import endpoint
+fix: correct order status mapping
+opt: improve Excel import performance
+refactor: simplify domain validation logic
+```
+
+中文示例：
+
+```text
+feat: 新增临时数据导入接口
+fix: 修复订单状态映射错误
+opt: 优化 Excel 导入性能
+refactor: 简化领域校验逻辑
+```
+
+### 常用提交类型
+
+- `feat`: 新功能
+- `fix`: 缺陷修复
+- `opt`: 优化，包括性能优化、体验优化、代码局部改进
+- `refactor`: 重构，不改变外部行为
+- `docs`: 文档修改
+- `test`: 测试相关修改
+- `style`: 格式调整，不影响代码逻辑
+- `chore`: 构建、配置、依赖、脚手架等非业务修改
+
+### 提交信息要求
+
+- summary 使用简洁的一句话描述本次提交的核心改动。
+- 不要使用含糊描述，例如 `update code`、`fix bug`、`修改问题`。
+- 不要在提交信息中加入无关信息，例如工具署名、聊天记录、临时说明。
+- 如果一次改动包含多个不相关目的，应建议拆分为多个提交。
+
+### 语言示例
+
+当 Git 用户为 `ms27946`：
+
+```text
+feat: add customer import validation
+fix: resolve duplicate order creation
+opt: reduce database queries during import
+refactor: extract order status conversion logic
+```
+
+当 Git 用户不是 `ms27946`：
+
+```text
+feat: 新增客户导入校验
+fix: 修复重复创建订单问题
+opt: 减少导入过程中的数据库查询
+refactor: 抽取订单状态转换逻辑
+```
+
